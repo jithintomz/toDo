@@ -5,9 +5,10 @@ from taskmanager.models import *
 from django.http import HttpResponse
 import ast
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
-
+@login_required
 def home(request):
     #poll = get_object_or_404(Poll, pk=poll_id)
     return render(request, 'taskmanager/home.html')

@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, url
 
 from taskmanager import views
+from django.contrib.auth import views as auth_views
 
 urlpatterns = patterns('',
     url(r'^$', views.home, name='home'),
@@ -12,4 +13,5 @@ urlpatterns = patterns('',
     url(r'^get-task-details/(?P<id>\d+)/$', views.get_task, name='get_task'),
     url(r'^get-tag-details/(?P<id>\d+)/$', views.get_tag, name='get_tag'),
     url(r'^update-or-delete-tag/$', views.update_or_delete_tag, name='update_or_delete_tag'),
+    url(r'^login/$',auth_views.login, name = "login_view")
 ) 

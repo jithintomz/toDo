@@ -12,8 +12,11 @@ app.run([
  '$http',
  '$cookies',
  function($http, $cookies) {
+
   $http.defaults.headers.post['X-CSRFToken'] = $cookies.csrftoken;
+ 
  }
+
 ]);
 
 
