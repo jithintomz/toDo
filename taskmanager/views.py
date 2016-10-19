@@ -6,12 +6,22 @@ from django.http import HttpResponse
 import ast
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group,User
+from guardian.models import UserObjectPermission
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from guardian.decorators import *
+from guardian.shortcuts import *
+
 # Create your views here.
 
 @login_required
 def home(request):
     #poll = get_object_or_404(Poll, pk=poll_id)
     return render(request, 'taskmanager/home.html')
+
+
+# @permission_required("auth.change_task","")
 def create_or_update_task(request):
 	taskDetails = json.loads(request.body)["taskdetails"]
 	tagstobeAdded = []
@@ -29,19 +39,25 @@ def create_or_update_task(request):
 		task.tags.remove(*(tagstobeDeleted))
 	else:
 		newTask = Task.objects.create(name = taskDetails["name"],description = taskDetails.get("description",""),isCompleted = taskDetails.get("iscompleted",False))
+		assign_perm("change_task",request.user,newTask)
+		print "permissions"
+		print get_perms(request.user,newTask)
 		tagObjects = Tag.objects.filter(id__in=json.loads(request.body)["temptags"])
 		newTask.tags.add(*(json.loads(request.body)["temptags"]))
 	return JsonResponse({"added":tagstobeAdded,"deleted":tagstobeDeleted},status=200);
+
+
 def get_tasks(request):
 	requestObj = dict(request.GET)
 	tasks = list(Task.objects.filter(Q(name__icontains = requestObj["q"][0])|Q(tags__name=requestObj["q"][0])).distinct().values())
 	return JsonResponse({"tasks":tasks},status=200);
-
-def remove_task(request):
+@require_POST
+@permission_required_or_403("change_task",("taskmanager.Task","id","id"))
+def remove_task(request,id):
 	requestObj = json.loads(request.body)
 	Task.objects.filter(id=requestObj["id"]).delete();
 	return JsonResponse({"status":"success"},status=200);
-
+@permission_required_or_403("change_task",("taskmanager.Task","id","id"))
 def get_task(request,id):
 	task = dict(Task.objects.values().get(id=id))
 	tags=list(Task.tags.through.objects.filter(task_id=id).values_list("tag_id",flat=True))
@@ -70,6 +86,7 @@ def update_or_delete_tag(request):
  	if requestObj["action"] == "update":
  		Tag.objects.filter(id=requestObj["tagdetails"]["id"]).update(name=requestObj["tagdetails"]["name"])
 	return JsonResponse({"status":"success"},status=200);
+
 
 	
 	  	

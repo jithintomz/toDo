@@ -8,7 +8,8 @@ from django.dispatch import receiver
 def add_to_group(sender,**kwargs):
 	print "recieved signal"
 	if kwargs["created"] == True:
-			kwargs["instance"].groups.add(Group.objects.get_or_create(name = "managers")[0].id)
+            pass;
+			#kwargs["instance"].groups.add(Group.objects.get_or_create(name = "managers")[0].id)
 
 class Employee(models.Model):
 	user  = models.OneToOneField(auth_user,primary_key=True)
@@ -25,5 +26,3 @@ class Task(models.Model):
     isCompleted = models.NullBooleanField(blank=True,null=True,default=False)
     dueDate = models.DateTimeField(null=True,blank=True)
     tags = models.ManyToManyField(Tag)
-
-    

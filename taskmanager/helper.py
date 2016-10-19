@@ -4,8 +4,8 @@ import json
 
 
 class JsonResponse(HttpResponse):
-    def __init__(self, content={}, mimetype=None, status=None, content_type='application/json'):
-        super(JsonResponse,self).__init__(json.dumps(content,cls=DjangoJSONEncoder), mimetype=mimetype,
+    def __init__(self, content={}, status=None, content_type='application/json'):
+        super(JsonResponse,self).__init__(json.dumps(content,cls=DjangoJSONEncoder),
                                            status=status, content_type=content_type)
 
 

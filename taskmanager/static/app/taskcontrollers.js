@@ -82,7 +82,7 @@ app.controller("taskcontrol", function($scope, $http, $routeParams, $filter) {
         $http({
             ignoreLoadingBar: true,
             method: 'POST',
-            url: '/remove-task/',
+            url: '/remove-task/'+String(id)+"/",
             data: {
                 "id": id
             }, // pass in data as strings
@@ -182,7 +182,7 @@ app.controller("mainpagecontrol", function($scope, $http) {
         $http({
             ignoreLoadingBar: true,
             method: 'POST',
-            url: '/remove-task/',
+            url: '/remove-task/'+String(id)+"/",
             data: {
                 "id": id
             }, // pass in data as strings
