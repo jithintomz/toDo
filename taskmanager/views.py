@@ -21,7 +21,7 @@ def home(request):
     return render(request, 'taskmanager/home.html')
 
 
-# @permission_required("auth.change_task","")
+@login_required
 def create_or_update_task(request):
 	taskDetails = json.loads(request.body)["taskdetails"]
 	tagstobeAdded = []
@@ -46,31 +46,38 @@ def create_or_update_task(request):
 		newTask.tags.add(*(json.loads(request.body)["temptags"]))
 	return JsonResponse({"added":tagstobeAdded,"deleted":tagstobeDeleted},status=200);
 
-
+@login_required
 def get_tasks(request):
 	requestObj = dict(request.GET)
-	tasks = list(Task.objects.filter(Q(name__icontains = requestObj["q"][0])|Q(tags__name=requestObj["q"][0])).distinct().values())
+	tasks = get_objects_for_user(request.user,"change_task",klass = Task)
+	tasks = list(tasks.filter(Q(name__icontains = requestObj["q"][0])|Q(tags__name=requestObj["q"][0])).distinct().values())
 	return JsonResponse({"tasks":tasks},status=200);
+
 @require_POST
 @permission_required_or_403("change_task",("taskmanager.Task","id","id"))
 def remove_task(request,id):
 	requestObj = json.loads(request.body)
 	Task.objects.filter(id=requestObj["id"]).delete();
 	return JsonResponse({"status":"success"},status=200);
+
 @permission_required_or_403("change_task",("taskmanager.Task","id","id"))
 def get_task(request,id):
 	task = dict(Task.objects.values().get(id=id))
 	tags=list(Task.tags.through.objects.filter(task_id=id).values_list("tag_id",flat=True))
 	return JsonResponse({"task":task,"tags":tags},status=200);
+
+@login_required
 def get_tag(request,id):
 	tag = dict(Tag.objects.values("name","id").get(id=id))
 	return JsonResponse({"tag":tag},status=200);
 
+@login_required
 def get_tags(request):
 	requestObj = dict(request.GET)
 	tags = list(Tag.objects.all().values("name","id"))
 	return JsonResponse({"tags":tags},status=200);
 
+@login_required
 def create_tags(request):
  	requestObj = json.loads(request.body)
  	tags = list(requestObj['tags'].split(','))
@@ -79,6 +86,7 @@ def create_tags(request):
  	tags = list(Tag.objects.all().values("name","id"))
 	return JsonResponse({"tags":tags},status=200);
 
+@login_required
 def update_or_delete_tag(request):
  	requestObj = json.loads(request.body)
  	if requestObj["action"] == "delete":
